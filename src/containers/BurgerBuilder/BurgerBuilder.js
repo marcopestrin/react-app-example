@@ -1,7 +1,7 @@
 import React, {Component}   from 'react';
 import Aux                  from '../../hoc/Aux/Aux';
 import withErrorHandler     from '../../hoc/withErrorHandler/withErrorHandler';
-import axios                from '../../axios.orders';
+import axios                from '../../axios-orders';
 import Burger               from '../../components/Burger/Burger';
 import BuildControls        from '../../components/Burger/BuildControls/BuildControls'
 import OrderSummary         from '../../components/Burger/OrderSumary/OrderSummary';
@@ -93,39 +93,17 @@ class BurgerBuilder extends Component {
         this.setState({purchasing:false})
     }
 
-    purchaseContinueHandle = () => { //concludi ordine
-        this.setState({loading:true})
-        const order = { //dati dell'ordine
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,
-            customer: {
-                name: 'marco pestrin',
-                adress: {
-                    street: 'via Roma 97',
-                    zipCode: '43434',
-                    country: 'italy'
-                },
-                email: 'pes@gmail.com'
-            },
-            deliveryMethod: ''
-        }
-
-        //invio dati al database 
-        axios.post('/orders.json', order)
-            .then(response => {
-                this.setState({
-                    loading:false,
-                    purchasing:false
-                });
-                console.log(response);
-            })
-            .catch(error => {
-                this.setState({
-                    loading:false,
-                    purchasing:false
-                });
-                console.log(error);
-            });
+    purchaseContinueHandle = () => { //vai a checkout
+           const queryParams = [];
+           for(var i in this.state.ingredients){
+                queryParams.push(encodeURIComponent(i)+'='+encodeURIComponent(this.state.ingredients[i]))
+           }
+           queryParams.push('price=' + this.state.totalPrice);
+           const queryString = queryParams.join('&'); 
+           this.props.history.push({
+               pathname:'/checkout',
+               search:'?'+queryString
+           });
     }
 
     render() {
