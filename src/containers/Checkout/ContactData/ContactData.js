@@ -92,7 +92,7 @@ class ContactData extends Component {
                 },
                 value:'',
                 validation: {
-                    required:false,
+                    required:true,
                 },
                 valid:true
             }
@@ -116,6 +116,7 @@ class ContactData extends Component {
         return isValid;
     }
     inputChangedHandler = (event, inputIdentifier) =>  { //gestione contenuto form per la spedizione
+        console.log("cambio");
         const updatedDeliveryForm = {...this.state.orderForm}
         const updateElement = {...updatedDeliveryForm[inputIdentifier]}
         updateElement.value = event.target.value
