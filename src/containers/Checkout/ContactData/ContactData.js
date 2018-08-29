@@ -1,37 +1,150 @@
 import React, {Component}   from 'react';
-import Button               from '../../../components/UI/Button/Button';
-import Spinner              from '../../../components/UI/Spinner/Spinner';
 import classes              from './ContactData.css';
 import axios                from '../../../axios-orders';
+import Button               from '../../../components/UI/Button/Button';
+import Spinner              from '../../../components/UI/Spinner/Spinner';
+import Input                from '../../../components/UI/Input/Input';
+
 class ContactData extends Component {
     state = {
         loading:false, 
-        customer: {
-            name: '',
-            adress: {
-                street: '',
-                zipCode: '',
-                country: ''
+        formIsValid:false,
+        orderForm:{
+            name: {
+                element:'input',
+                config: {
+                    type:'text',
+                    placeholder:'Your Name'
+                },
+                value:'',
+                validation: {
+                    required:true,
+                    minLength:5,
+                    maxLength:15
+                },
+                valid:false,
+                touched:false
             },
-            email: ''
+            street: {
+                element:'input',
+                config: {
+                    type:'text',
+                    placeholder:'Your Street'
+                },
+                value:'',
+                validation: {
+                    required:true,
+                    minLength:5,
+                    maxLength:25
+                },
+                valid:false,
+                touched:false
+            },
+            zipCode: {
+                element:'input',
+                config: {
+                    type:'number',
+                    placeholder:'Your Zip Code'
+                },
+                value:'',
+                validation: {
+                    required:true,
+                    minLength:5,
+                    maxLength:10
+                },
+                valid:false,
+                touched:false
+            },
+            country: {
+                element:'input',
+                config: {
+                    type:'text',
+                    placeholder:'Your City'
+                },
+                value:'',
+                validation: {
+                    required:true,
+                    minLength:5,
+                    maxLength:15
+                },
+                valid:false,
+                touched:false
+            },
+            email: {
+                element:'input',
+                config: {
+                    type:'email',
+                    placeholder:'Your email'
+                },
+                value:'',
+                validation: {
+                    required:false,
+                },
+                valid:true
+            },
+            deliveryMethod: {
+                element:'select',
+                config: {
+                    options:[
+                        {value:'cash on delivery', displayValue: 'Cash on delivery'},
+                        {value:'credit card', displayValue: 'Credit card'},
+                    ]
+                },
+                value:'',
+                validation: {
+                    required:false,
+                },
+                valid:true
+            }
         }
+    }
+    validation(value,rules){
+        var isValid = true; //trick per la somma delle condizioni di validità
+        if(!rules){
+            return true;
+        }
+        if(rules.required){
+            isValid = value.trim() !== '' && isValid;
+        };
+        if(rules.minLength){
+            isValid = value.length >= rules.minLength && isValid;
+            console.log("questoooo:", isValid);
+        }
+        if(rules.maxLength){
+            isValid = value.length <= rules.maxLength && isValid;
+        }
+        return isValid;
+    }
+    inputChangedHandler = (event, inputIdentifier) =>  { //gestione contenuto form per la spedizione
+        const updatedDeliveryForm = {...this.state.orderForm}
+        const updateElement = {...updatedDeliveryForm[inputIdentifier]}
+        updateElement.value = event.target.value
+        updateElement.valid = this.validation(updateElement.value, updateElement.validation);
+        updateElement.touched = true;
+        updatedDeliveryForm[inputIdentifier] = updateElement;
+
+        //server per tenere disattivato il bottone di submit affinchè l'iterno form non sia completamente validato
+        var formIsValid = true;
+        for(var inputIdentifier in updatedDeliveryForm) {
+            formIsValid = updatedDeliveryForm[inputIdentifier].valid && formIsValid;
+        }
+
+        this.setState({
+            formIsValid: formIsValid,
+            orderForm : updatedDeliveryForm
+        });
     }
     orderHandler = (event) => { //concludi l'ordine
         event.preventDefault();
         this.setState({loading:true})
+        const dataDelivery = {};
+        for(var formElementIdentifier in this.state.orderForm) {
+            dataDelivery[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value;
+        } 
         const order = { //dati dell'ordine
             ingredients: this.props.ingredients,
             price: this.props.price,
-            customer: {
-                name: '',
-                adress: {
-                    street: '',
-                    zipCode: '',
-                    country: ''
-                },
-                email: ''
-            },
-            deliveryMethod: ''
+            orderData: dataDelivery
         }
 
         //invio dati al database 
@@ -51,14 +164,33 @@ class ContactData extends Component {
             });
     }
     render(){
+        const formElementsArray = [];
+        for(var key in this.state.orderForm) {
+            formElementsArray.push({    
+                id:key, //IDENTIFICATIVO
+                configuration:this.state.orderForm[key]
+            })
+        };
         var form = (
-            <form>
-                <input className={classes.Input} type="text" name="name" placeholder="Your Name" />
-                <input className={classes.Input} type="email" name="email" placeholder="Your E-mail" />
-                <input className={classes.Input} type="text" name="street" placeholder="Your Street" />
-                <input className={classes.Input} type="text" name="postalcode" placeholder="Your Postal Code" />
-                <input className={classes.Input} type="text" name="country" placeholder="Your Country" />
-                <Button btnType="Success" clicked={this.orderHandler}>Order</Button>
+            <form onSubmit={this.orderHandler}>
+                {formElementsArray.map(formElement =>(
+                    <Input 
+                        key ={formElement.id} //IDENTIFICATIVO
+                        changed = {(event) => this.inputChangedHandler(event,formElement.id)}
+                        invalid = {!formElement.configuration.valid} //LA VALIDAZIONE E' ANDATA A BUON FINE??
+                        shouldValidate ={formElement.configuration.validation} //IL CAMPO E' OBBLIGATORIO?
+                        touched = {formElement.configuration.touched}
+                        elementConfig = {formElement.configuration.config}
+                        value = {formElement.configuration.config}
+                        elementType = {formElement.configuration.element} />
+                ))}
+                <Button 
+                    btnType = "Success"
+                    disabled = {!this.state.formIsValid}
+                    clicked = {this.orderHandler}
+                >
+                        Order
+                </Button>
             </form>
         );
         if(this.state.loading) {
