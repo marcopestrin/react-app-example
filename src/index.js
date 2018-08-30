@@ -9,7 +9,6 @@ import {createStore}            from 'redux';
 import './index.css';
 
 const store = createStore(reducer);
-console.log("store: ",store);
 const app = (
     <Provider store={store}>
         <BrowserRouter>

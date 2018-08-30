@@ -1,5 +1,5 @@
 import React, {Component}   from 'react';
-import {connect}             from 'react-redux';
+import {connect}            from 'react-redux';
 import classes              from './ContactData.css';
 import axios                from '../../../axios-orders';
 import Button               from '../../../components/UI/Button/Button';

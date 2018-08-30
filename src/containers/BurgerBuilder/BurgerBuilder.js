@@ -24,18 +24,6 @@ class BurgerBuilder extends Component {
         error:false
     }
 
-    componentDidMount () {
-        /*
-        axios.get("https://react-my-burger-1840c.firebaseio.com/ingredients.json")
-            .then(response => {
-                this.setState({ingredients:response.data});
-            })
-            .catch(error => {
-                this.setState({error:true});
-            });
-        */
-    }
-
     updatePurchaseState = (ingredients) => {
         const sum = Object.keys(ingredients)
             .map(igKey =>{
@@ -113,7 +101,6 @@ const mapStateToProps = state => {
         price:state.totalPrice
     };
 }
-console.log('mapStateToProps:',mapStateToProps);
 const mapDispatchToProps = dispatch => {
     return {
         onIngredientAdded: (ingName) => dispatch({
