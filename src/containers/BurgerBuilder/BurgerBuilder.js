@@ -1,14 +1,14 @@
-import React, {Component}   from 'react';
-import {connect}            from 'react-redux';
-import  * as actionTypes    from '../../store/actions';
-import Aux                  from '../../hoc/Aux/Aux';
-import withErrorHandler     from '../../hoc/withErrorHandler/withErrorHandler';
-import axios                from '../../axios-orders';
-import Burger               from '../../components/Burger/Burger';
-import BuildControls        from '../../components/Burger/BuildControls/BuildControls'
-import OrderSummary         from '../../components/Burger/OrderSumary/OrderSummary';
-import Spinner              from '../../components/UI/Spinner/Spinner';
-import Modal                from '../../components/UI/Modal/Modal';
+import React, {Component}            from 'react';
+import {connect}                     from 'react-redux';
+import  * as actions                 from '../../store/actions/index';
+import Aux                           from '../../hoc/Aux/Aux';
+import withErrorHandler              from '../../hoc/withErrorHandler/withErrorHandler';
+import axios                         from '../../axios-orders';
+import Burger                        from '../../components/Burger/Burger';
+import BuildControls                 from '../../components/Burger/BuildControls/BuildControls'
+import OrderSummary                  from '../../components/Burger/OrderSumary/OrderSummary';
+import Spinner                       from '../../components/UI/Spinner/Spinner';
+import Modal                         from '../../components/UI/Modal/Modal';
 
 const INGREDIENTS_PRICE = { //prezzo di ogni singolo ingrediente
     salad:0.4,
@@ -23,7 +23,9 @@ class BurgerBuilder extends Component {
         purchasing:false,
         error:false
     }
-
+    componentDidMount() {
+        this.props.onInitIngredients();
+    }
     updatePurchaseState = (ingredients) => {
         const sum = Object.keys(ingredients)
             .map(igKey =>{
@@ -44,11 +46,12 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandle = () => { //vai a checkout
-           this.props.history.push('/checkout');
+        this.props.onInitPurchase();
+        this.props.history.push('/checkout');
     };
 
     render() {
-        let burger = this.state.error ? <p>Ingredients can't be loaded</p> : <Spinner />;
+        let burger = this.props.error ? <p>Ingredients can't be loaded</p> : <Spinner />;
         let orderSummary= null
 
         const disabledInfo = {
@@ -97,20 +100,17 @@ class BurgerBuilder extends Component {
 }
 const mapStateToProps = state => {
     return {
-        ings:state.ingredients,
-        price:state.totalPrice
+        ings:state.burgerBuilder.ingredients,
+        price:state.burgerBuilder.totalPrice,
+        error:state.burgerBuilder.error,
     };
 }
 const mapDispatchToProps = dispatch => {
     return {
-        onIngredientAdded: (ingName) => dispatch({
-            type : actionTypes.ADD_INGREDIENT,
-            ingredientName: ingName
-        }),
-        onIngredientRemoved: (ingName) => dispatch({
-            type : actionTypes.REMOVE_INGREDIENT,
-            ingredientName: ingName
-        })
+        onIngredientAdded: (ingName) => dispatch(actions.addIngredient(ingName)),
+        onIngredientRemoved: (ingName) =>  dispatch(actions.removeIngredient(ingName)),
+        onInitIngredients: () => dispatch(actions.initIngredients()),
+        onInitPurchase: () => dispatch(actions.purchaseInit())
     };
 }
 
