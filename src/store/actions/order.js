@@ -19,11 +19,11 @@ export const purchaseBurgerStart = () => {
         type:actionTypes.PURCHASE_BURGER_START
     };
 }
-export const purchaseBurger = (orderData) => {
+export const purchaseBurger = (orderData,token) => {
     return dispatch => {
         dispatch(purchaseBurgerStart());
         //invio dati al database
-        axios.post('/orders.json', orderData)
+        axios.post('/orders.json?auth='+token, orderData)
             .then(response => {
                 console.log(response.data);
                 dispatch(purchaseBurgerSuccess(response.data.name, orderData));
@@ -56,10 +56,11 @@ export const fetchOrdersStart = () => {
         type:actionTypes.FETCH_ORDERS_START
     }
 }
-export const fetchOrders = () => {
+export const fetchOrders = (token, userId) => {
     return dispatch => {
         dispatch(fetchOrdersStart);
-        axios.get('https://react-my-burger-1840c.firebaseio.com/orders.json')
+        var queryParams = '?auth=' + token + '&orderBy="userId"&equalTo="' + userId + '"';
+        axios.get('/orders.json'+queryParams)
             .then (res => {
                 var fetchedOrders = [];
                 for(var key in res.data){

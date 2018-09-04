@@ -4,7 +4,8 @@ import {updateObject} from '../utility';
 const initialState = {
      ingredients:null,
      totalPrice:4,
-     error:false
+     error:false,
+     building:false
 };
 const INGREDIENTS_PRICE = { //prezzo di ogni singolo ingrediente
     salad:0.4,
@@ -22,6 +23,7 @@ const reducer  = (state = initialState, action) => {
             } //nuovo stato
             const updatedIngredients = updateObject(state.ingredients, updatedIngredient); //merge dei due stati d'ingredienti
             const updatedState = {
+                building:true,
                 ingredients: updatedIngredients,
                 totalPrice: state.totalPrice + INGREDIENTS_PRICE[action.ingredientName]
             };
@@ -47,7 +49,8 @@ const reducer  = (state = initialState, action) => {
                     meat:action.ingredients.meat,
                 }, 
                 totalPrice:4,
-                error:false
+                error:false,
+                building:false
             });
 
         case actionType.FETCH_INGREDIENTS_FAILED:
